@@ -1,0 +1,49 @@
+@inherits LayoutComponentBase
+
+<div class="app-shell">
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="" class="brand">
+                <span class="brand-mark" aria-hidden="true"></span>
+                <span>OBSIDIAN<span class="text-muted mono">//SYS</span></span>
+            </a>
+
+            <nav class="nav-links" aria-label="Primary Navigation">
+                <a href="#overview" class="nav-item active">Overview</a>
+                <a href="#bento" class="nav-item">Architecture</a>
+                <a href="#components" class="nav-item">Components</a>
+                <a href="#telemetry" class="nav-item">Telemetry</a>
+            </nav>
+
+            <div class="flex-row">
+                <span class="badge">
+                    <span class="status-dot online"></span>
+                    <span>PURE CSS // v1.0</span>
+                </span>
+                <a href="#components" class="btn btn-matte">Customize</a>
+            </div>
+        </div>
+    </header>
+
+    <main style="flex: 1;">
+        @Body
+    </main>
+
+    <footer style="padding-block: 2.5rem; border-block-start: 1px solid var(--border-subtle);">
+        <div class="container flex-between" style="flex-wrap: wrap;">
+            <div class="flex-row">
+                <span class="brand-mark" aria-hidden="true"></span>
+                <span class="mono text-muted">OBSIDIAN MATTE BLACK STARTER — C# BLAZOR &amp; PURE CSS</span>
+            </div>
+            <div class="mono text-muted">
+                <span>ZERO FRAMEWORKS // READY FOR ANY PROJECT IDEA</span>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
