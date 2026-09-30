@@ -1,0 +1,402 @@
+@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>OBSIDIAN // Matte Black Blazor Design System</PageTitle>
+
+<!-- HERO SECTION -->
+<section id="overview" class="section">
+    <div class="container stack-lg">
+        <div class="flex-row">
+            <span class="badge">
+                <span class="status-dot online"></span>
+                <span>SYSTEM READY // .NET 10 BLAZOR</span>
+            </span>
+            <span class="badge">0% EXTERNAL CSS FRAMEWORKS</span>
+            <span class="badge">MATTE BLACK EDITION</span>
+        </div>
+
+        <div class="stack-md" style="max-inline-size: 54rem;">
+            <h1 class="hero-title">
+                Engineered in Matte Black. Ready for Your Next Idea.
+            </h1>
+            <p style="font-size: 1.125rem; max-inline-size: 44rem;">
+                A high-contrast, obsidian-grade Blazor starter template built strictly with C# and pure modern CSS. Swap in your domain logic, connect your database, or adapt the modular bento grid in minutes.
+            </p>
+        </div>
+
+        <div class="flex-row" style="padding-block-start: 0.5rem;">
+            <button type="button" class="btn btn-primary" @onclick="CyclePreset">
+                <span>Switch Project Preset: @CurrentPreset.Name</span>
+            </button>
+            <button type="button" class="btn btn-matte" @onclick="TriggerPulse">
+                <span>Run System Diagnostic (@PulseCount)</span>
+            </button>
+            <a href="#components" class="btn btn-ghost">Explore UI Kit &rarr;</a>
+        </div>
+
+        <!-- Quick KPI Strip -->
+        <div class="bento-grid" style="padding-block-start: 1rem;">
+            @foreach (var stat in CurrentPreset.Metrics)
+            {
+                <div class="matte-card col-span-3">
+                    <div class="stack-sm">
+                        <span class="card-kicker">@stat.Label</span>
+                        <div class="metric-value">@stat.Value</div>
+                    </div>
+                    <div class="flex-between">
+                        <span class="mono text-muted">@stat.Delta</span>
+                        <span class="status-dot @(stat.IsHealthy ? "online" : "warning")"></span>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- BENTO GRID ARCHITECTURE -->
+<section id="bento" class="section">
+    <div class="container stack-lg">
+        <div class="flex-between" style="flex-wrap: wrap;">
+            <div class="stack-sm">
+                <span class="card-kicker">01 // MODULAR BENTO GRID</span>
+                <h2 class="section-title">@CurrentPreset.Tagline</h2>
+            </div>
+            <span class="badge">@CurrentPreset.Category</span>
+        </div>
+
+        <div class="bento-grid">
+            <!-- Primary Feature Card (8 Cols) -->
+            <article class="matte-card interactive col-span-8">
+                <div class="stack-md">
+                    <div class="card-header">
+                        <span class="card-kicker">CORE MODULE // 01</span>
+                        <span class="badge">ACTIVE</span>
+                    </div>
+                    <h3 class="card-title" style="font-size: 1.5rem;">@CurrentPreset.PrimaryTitle</h3>
+                    <p>@CurrentPreset.PrimaryDescription</p>
+                </div>
+
+                <div class="terminal-box">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">$</span>
+                        <span class="text-primary">dotnet run --project ObsidianBlazor.csproj</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">&gt;</span>
+                        <span>Preset Loaded: [@CurrentPreset.Name] — Mode: InteractiveServer</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">&gt;</span>
+                        <span style="color: var(--accent-emerald);">Status: All pure CSS cascade layers verified. Last pulse: @LastPulseTime</span>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Secondary Card (4 Cols) -->
+            <article class="matte-card interactive col-span-4">
+                <div class="stack-sm">
+                    <div class="card-header">
+                        <span class="card-kicker">RESOURCE ALLOCATION</span>
+                        <span class="mono text-secondary">@CapacityLoad%</span>
+                    </div>
+                    <h3 class="card-title">Matte Surface Density</h3>
+                    <p>Layered carbon surfaces (`#070708` to `#18181e`) with 1px specular borders.</p>
+                </div>
+
+                <div class="stack-md">
+                    <div class="stack-sm">
+                        <div class="flex-between mono" style="font-size: 0.75rem;">
+                            <span class="text-secondary">THROUGHPUT</span>
+                            <span class="text-primary">@CapacityLoad%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="inline-size: @(CapacityLoad)%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex-row">
+                        <button type="button" class="btn btn-matte" style="flex: 1;" @onclick="() => AdjustLoad(-10)">-10%</button>
+                        <button type="button" class="btn btn-matte" style="flex: 1;" @onclick="() => AdjustLoad(10)">+10%</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 3 Equal Cards (4 Cols Each) -->
+            <article class="matte-card interactive col-span-4">
+                <div class="stack-sm">
+                    <span class="card-kicker">TOKEN ARCHITECTURE</span>
+                    <h3 class="card-title">Zero-Framework CSS</h3>
+                    <p>Built with native `@("@layer")`, custom properties, fluid `clamp()` typography, and `:has()` state selectors.</p>
+                </div>
+                <span class="mono text-muted">wwwroot/app.css</span>
+            </article>
+
+            <article class="matte-card interactive col-span-4">
+                <div class="stack-sm">
+                    <span class="card-kicker">C# INTERACTIVITY</span>
+                    <h3 class="card-title">Reactive State</h3>
+                    <p>Ready for real-time C# events, forms, and data bindings without writing a single line of JavaScript.</p>
+                </div>
+                <span class="mono text-muted">InteractiveServer</span>
+            </article>
+
+            <article class="matte-card interactive col-span-4">
+                <div class="stack-sm">
+                    <span class="card-kicker">ADAPTABLE TEMPLATE</span>
+                    <h3 class="card-title">Plug &amp; Play</h3>
+                    <p>Whether you decide to build a SaaS dashboard, portfolio, AI tool, or game hub, the layout adapts immediately.</p>
+                </div>
+                <span class="mono text-muted">12-Column Bento</span>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- INTERACTIVE UI KIT & WORKSPACE -->
+<section id="components" class="section">
+    <div class="container stack-lg">
+        <div class="stack-sm">
+            <span class="card-kicker">02 // INTERACTIVE COMPONENT KIT</span>
+            <h2 class="section-title">Pure CSS Controls &amp; Live Sandbox</h2>
+        </div>
+
+        <div class="bento-grid">
+            <!-- Form & Input Sandbox -->
+            <div class="matte-card col-span-6">
+                <div class="stack-sm">
+                    <span class="card-kicker">INPUTS &amp; CONTROLS</span>
+                    <h3 class="card-title">Quick Idea Prototyper</h3>
+                    <p>Test adding items or configuring modules directly in C# state.</p>
+                </div>
+
+                <div class="stack-md">
+                    <div class="field-group">
+                        <label class="field-label" for="module-name">
+                            <span>MODULE IDENTIFIER</span>
+                            <span class="mono">REQUIRED</span>
+                        </label>
+                        <input id="module-name"
+                               class="input-matte"
+                               placeholder="e.g., Neural Search Engine, Crypto Vault, Task Tracker..."
+                               @bind="NewModuleName"
+                               @bind:event="oninput" />
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="module-tag">
+                            <span>CATEGORY TAG</span>
+                            <span class="mono">OPTIONAL</span>
+                        </label>
+                        <input id="module-tag"
+                               class="input-matte"
+                               placeholder="e.g., CORE // API // UI"
+                               @bind="NewModuleTag" />
+                    </div>
+
+                    <div class="flex-between" style="padding-block-start: 0.25rem;">
+                        <span class="mono text-muted">Preview: @(string.IsNullOrWhiteSpace(NewModuleName) ? "Awaiting input..." : NewModuleName)</span>
+                        <button type="button" class="btn btn-primary" @onclick="AddCustomModule">
+                            Deploy Module
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pure CSS :has(:checked) Toggles -->
+            <div class="matte-card col-span-6">
+                <div class="stack-sm">
+                    <span class="card-kicker">STATE SELECTORS // :has(:checked)</span>
+                    <h3 class="card-title">System Configuration Matrix</h3>
+                    <p>Each row styles its own border and elevation purely via CSS `:has(:checked)`.</p>
+                </div>
+
+                <div class="stack-sm">
+                    <label class="toggle-row">
+                        <div class="stack-sm" style="gap: 0.15rem;">
+                            <span class="text-primary" style="font-size: 0.875rem; font-weight: 500;">Stealth Obsidian Mode</span>
+                            <span class="mono text-muted">Ultra-low luminance background surfaces</span>
+                        </div>
+                        <input type="checkbox" class="toggle-switch" checked />
+                    </label>
+
+                    <label class="toggle-row">
+                        <div class="stack-sm" style="gap: 0.15rem;">
+                            <span class="text-primary" style="font-size: 0.875rem; font-weight: 500;">Real-Time Telemetry Stream</span>
+                            <span class="mono text-muted">Synchronize live C# state changes</span>
+                        </div>
+                        <input type="checkbox" class="toggle-switch" checked />
+                    </label>
+
+                    <label class="toggle-row">
+                        <div class="stack-sm" style="gap: 0.15rem;">
+                            <span class="text-primary" style="font-size: 0.875rem; font-weight: 500;">Strict Zero-JS Enforcement</span>
+                            <span class="mono text-muted">Pure CSS transitions and layout containment</span>
+                        </div>
+                        <input type="checkbox" class="toggle-switch" />
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- TELEMETRY / DATA TABLE SECTION -->
+<section id="telemetry" class="section" style="border-block-end: none;">
+    <div class="container stack-lg">
+        <div class="flex-between" style="flex-wrap: wrap;">
+            <div class="stack-sm">
+                <span class="card-kicker">03 // LIVE REGISTRY</span>
+                <h2 class="section-title">Active Workspace Nodes (@Modules.Count)</h2>
+            </div>
+            <div class="flex-row">
+                <input class="input-matte"
+                       style="inline-size: 240px;"
+                       placeholder="Filter nodes..."
+                       @bind="SearchFilter"
+                       @bind:event="oninput" />
+            </div>
+        </div>
+
+        <div class="matte-table-wrap">
+            <table class="matte-table">
+                <thead>
+                    <tr>
+                        <th>NODE ID</th>
+                        <th>MODULE NAME</th>
+                        <th>CATEGORY</th>
+                        <th>LATENCY</th>
+                        <th>STATUS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in FilteredModules)
+                    {
+                        <tr>
+                            <td class="mono text-primary">@item.Id</td>
+                            <td class="text-primary" style="font-weight: 500;">@item.Name</td>
+                            <td><span class="badge">@item.Category</span></td>
+                            <td class="mono">@item.Latency</td>
+                            <td>
+                                <span class="badge">
+                                    <span class="status-dot @(item.Healthy ? "online" : "warning")"></span>
+                                    <span>@(item.Healthy ? "OPERATIONAL" : "STANDBY")</span>
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+@code {
+    private int PresetIndex = 0;
+    private int PulseCount = 1;
+    private int CapacityLoad = 78;
+    private string LastPulseTime = DateTime.Now.ToString("HH:mm:ss");
+    private string NewModuleName = "";
+    private string NewModuleTag = "";
+    private string SearchFilter = "";
+
+    private record MetricItem(string Label, string Value, string Delta, bool IsHealthy);
+    private record PresetModel(
+        string Name,
+        string Category,
+        string Tagline,
+        string PrimaryTitle,
+        string PrimaryDescription,
+        List<MetricItem> Metrics
+    );
+    private record ModuleNode(string Id, string Name, string Category, string Latency, bool Healthy);
+
+    private readonly List<PresetModel> Presets =
+    [
+        new(
+            "Obsidian Studio",
+            "TEMPLATE // GENERAL PURPOSE",
+            "Versatile Dark Foundation for Any Web App",
+            "Minimalist Carbon Architecture",
+            "Designed as a blank-canvas flagship template. Replace these cards with your product features, portfolio case studies, or interactive tools whenever your idea is ready.",
+            [
+                new("SURFACE CONTRAST", "21:1", "+AAA COMPLIANT", true),
+                new("CSS DEPENDENCIES", "0 KB", "100% NATIVE CSS", true),
+                new("RENDER LATENCY", "1.4 ms", "-0.3ms OPTIMAL", true),
+                new("ACTIVE MODULES", "12", "READY TO SCALE", true)
+            ]
+        ),
+        new(
+            "Nexus AI Lab",
+            "PRESET // AI & ANALYTICS",
+            "Neural Inference & Telemetry Command Center",
+            "Distributed Model Orchestration",
+            "Monitor token throughput, vector index shards, and real-time inference pipelines across dark-mode bento views.",
+            [
+                new("TOKEN VELOCITY", "14.2K/s", "+18.4% PEAK", true),
+                new("VECTOR SHARDS", "64", "ALL SYNCED", true),
+                new("GPU THERMAL", "62°C", "NOMINAL LOAD", true),
+                new("QUEUE DEPTH", "3", "NEAR-ZERO", true)
+            ]
+        ),
+        new(
+            "Vault Finance",
+            "PRESET // FINTECH & PORTFOLIO",
+            "High-Precision Asset & Ledger Terminal",
+            "Algorithmic Liquidity Engine",
+            "Track real-time positions, risk exposure, and immutable audit logs with tabular monospace precision.",
+            [
+                new("NET LIQUIDITY", "$1.48M", "+4.12% TODAY", true),
+                new("OPEN ORDERS", "8", "2 PENDING FILL", false),
+                new("SETTLEMENT", "0.8s", "INSTANT FINALITY", true),
+                new("RISK SCORE", "LOW", "99.4% HEDGED", true)
+            ]
+        )
+    ];
+
+    private List<ModuleNode> Modules =
+    [
+        new("MOD-01", "Obsidian Core Layout Engine", "LAYOUT // CSS", "0.4 ms", true),
+        new("MOD-02", "Bento Grid 12-Column Matrix", "ARCHITECTURE", "0.8 ms", true),
+        new("MOD-03", "Reactive C# State Dispatcher", "BLAZOR // C#", "1.2 ms", true),
+        new("MOD-04", "Zero-JS Toggle & Input Kit", "COMPONENTS", "0.3 ms", true),
+        new("MOD-05", "Custom Project Idea Slot", "EXTENSIBLE", "1.9 ms", false)
+    ];
+
+    private PresetModel CurrentPreset => Presets[PresetIndex];
+
+    private IEnumerable<ModuleNode> FilteredModules =>
+        string.IsNullOrWhiteSpace(SearchFilter)
+            ? Modules
+            : Modules.Where(m =>
+                m.Name.Contains(SearchFilter, StringComparison.OrdinalIgnoreCase) ||
+                m.Category.Contains(SearchFilter, StringComparison.OrdinalIgnoreCase) ||
+                m.Id.Contains(SearchFilter, StringComparison.OrdinalIgnoreCase));
+
+    private void CyclePreset()
+    {
+        PresetIndex = (PresetIndex + 1) % Presets.Count;
+    }
+
+    private void TriggerPulse()
+    {
+        PulseCount++;
+        LastPulseTime = DateTime.Now.ToString("HH:mm:ss");
+    }
+
+    private void AdjustLoad(int delta)
+    {
+        CapacityLoad = Math.Clamp(CapacityLoad + delta, 10, 100);
+    }
+
+    private void AddCustomModule()
+    {
+        if (string.IsNullOrWhiteSpace(NewModuleName))
+            return;
+
+        var id = $"MOD-{(Modules.Count + 1):D2}";
+        var category = string.IsNullOrWhiteSpace(NewModuleTag) ? "CUSTOM // IDEA" : NewModuleTag.ToUpperInvariant();
+        Modules.Insert(0, new ModuleNode(id, NewModuleName.Trim(), category, "0.5 ms", true));
+        NewModuleName = "";
+        NewModuleTag = "";
+    }
+}
