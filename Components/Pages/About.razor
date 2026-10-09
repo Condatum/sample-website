@@ -1,0 +1,37 @@
+@page "/about"
+
+<PageTitle>About · NovelShelf</PageTitle>
+
+<section class="section">
+    <div class="container-page flex max-w-3xl flex-col gap-6">
+        <span class="kicker">ABOUT</span>
+        <h1 class="hero-title">One shelf for every novel you read.</h1>
+        <p class="text-lg">
+            Web novels and light novels are scattered across dozens of sites, apps and browser tabs.
+            NovelShelf is a centralized library: add a novel from any site, track which chapter you're on,
+            and jump straight back to where you left off.
+        </p>
+    </div>
+</section>
+
+<section class="py-12 sm:py-18">
+    <div class="container-page grid grid-cols-1 gap-5 md:grid-cols-3">
+        @foreach (var (kicker, title, body) in Features)
+        {
+            <article class="card justify-start">
+                <span class="kicker">@kicker</span>
+                <h2 class="text-xl">@title</h2>
+                <p>@body</p>
+            </article>
+        }
+    </div>
+</section>
+
+@code {
+    private static readonly (string Kicker, string Title, string Body)[] Features =
+    [
+        ("01 · COLLECT", "Any source", "Paste a link from Royal Road, Webnovel, NovelUpdates, Syosetu or anywhere else. The source site is detected automatically."),
+        ("02 · TRACK", "Chapter progress", "Bump your chapter count with one click, set a status like Reading or Completed, and keep personal notes and ratings."),
+        ("03 · PRIVATE", "Stored in your browser", "There is no account or database yet. Your shelf is saved to this browser's local storage and can be exported as JSON.")
+    ];
+}

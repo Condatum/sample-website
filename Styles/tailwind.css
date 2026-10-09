@@ -88,6 +88,22 @@
         @apply border-b border-line-subtle py-12 sm:py-18;
     }
 
+    .nav-link {
+        @apply rounded-full px-3.5 py-1.5 text-[0.825rem] text-ink-secondary transition hover:text-ink;
+    }
+
+    .nav-link.active {
+        @apply bg-elevated text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.06)];
+    }
+
+    .mobile-link {
+        @apply block rounded-sm px-3 py-2.5 text-sm text-ink-secondary transition hover:bg-surface hover:text-ink;
+    }
+
+    .mobile-link.active {
+        @apply bg-elevated text-ink;
+    }
+
     .card {
         @apply relative flex flex-col justify-between gap-5 overflow-hidden rounded-md border border-line
                bg-linear-to-b from-surface to-matte p-6 shadow-matte transition duration-300 ease-out-expo

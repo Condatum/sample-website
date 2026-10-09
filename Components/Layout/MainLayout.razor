@@ -1,22 +1,52 @@
 @inherits LayoutComponentBase
+@implements IDisposable
+@inject NavigationManager Navigation
 
 <div class="flex min-h-dvh flex-col">
     <header class="sticky top-0 z-50 border-b border-line-subtle bg-void/80 backdrop-blur-lg">
         <div class="container-page flex h-16 items-center justify-between gap-6">
             <a href="" class="inline-flex items-center gap-2.5 text-[0.95rem] font-semibold tracking-tight">
                 <BrandMark />
-                <span>SAMPLE WEBSITE</span>
+                <span>NOVELSHELF</span>
             </a>
 
             <nav class="hidden items-center gap-1 rounded-full border border-line-subtle bg-matte p-1 md:flex" aria-label="Main Navigation">
-                <a href="#home" class="rounded-full bg-elevated px-3.5 py-1.5 text-[0.825rem] text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">Home</a>
-                <a href="#features" class="rounded-full px-3.5 py-1.5 text-[0.825rem] text-ink-secondary transition hover:text-ink">Features</a>
-                <a href="#cards" class="rounded-full px-3.5 py-1.5 text-[0.825rem] text-ink-secondary transition hover:text-ink">Cards</a>
-                <a href="#contact" class="rounded-full px-3.5 py-1.5 text-[0.825rem] text-ink-secondary transition hover:text-ink">Contact</a>
+                @foreach (var link in Links)
+                {
+                    <NavLink href="@link.Href" class="nav-link" Match="@link.Match">@link.Label</NavLink>
+                }
             </nav>
 
-            <a href="#contact" class="btn btn-primary">Get Started</a>
+            <div class="flex items-center gap-2">
+                <a href="add" class="btn btn-primary hidden sm:inline-flex">+ Add Novel</a>
+                <button type="button" class="btn btn-matte px-3 md:hidden" aria-label="Toggle menu"
+                        aria-expanded="@(menuOpen ? "true" : "false")" aria-controls="mobile-menu" @onclick="ToggleMenu">
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                        @if (menuOpen)
+                        {
+                            <path d="M6 6l12 12M18 6L6 18" />
+                        }
+                        else
+                        {
+                            <path d="M4 7h16M4 12h16M4 17h16" />
+                        }
+                    </svg>
+                </button>
+            </div>
         </div>
+
+        @if (menuOpen)
+        {
+            <nav id="mobile-menu" class="border-t border-line-subtle md:hidden" aria-label="Mobile Navigation">
+                <div class="container-page flex flex-col gap-1 py-3">
+                    @foreach (var link in Links)
+                    {
+                        <NavLink href="@link.Href" class="mobile-link" Match="@link.Match">@link.Label</NavLink>
+                    }
+                    <a href="add" class="btn btn-primary mt-2 sm:hidden">+ Add Novel</a>
+                </div>
+            </nav>
+        }
     </header>
 
     <main class="flex-1">
@@ -27,7 +57,7 @@
         <div class="container-page flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-3">
                 <BrandMark />
-                <span class="text-ink-secondary">Sample Website</span>
+                <span class="text-ink-secondary">NovelShelf</span>
             </div>
             <span class="text-ink-muted">Built with C# Blazor &amp; Tailwind CSS</span>
         </div>
@@ -39,3 +69,28 @@
     <a href="." class="reload underline">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private record NavItem(string Href, string Label, NavLinkMatch Match = NavLinkMatch.Prefix);
+
+    private static readonly NavItem[] Links =
+    [
+        new("", "Library", NavLinkMatch.All),
+        new("about", "About")
+    ];
+
+    private bool menuOpen;
+
+    protected override void OnInitialized() => Navigation.LocationChanged += CloseMenu;
+
+    private void ToggleMenu() => menuOpen = !menuOpen;
+
+    private void CloseMenu(object? sender, LocationChangedEventArgs e)
+    {
+        if (!menuOpen) return;
+        menuOpen = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose() => Navigation.LocationChanged -= CloseMenu;
+}
