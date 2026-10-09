@@ -35,4 +35,6 @@ public class Novel
     public Source Source { get; set; } = default!;
 
     public ICollection<Tag> Tags { get; set; } = [];
+
+    public ICollection<LibraryEntry> LibraryEntries { get; set; } = [];
 }

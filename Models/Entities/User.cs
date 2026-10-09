@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ObsidianBlazor.Models.Entities;
 
-/// <summary>A reader with an account.</summary>
+/// <summary>A reader who owns a library of novels.</summary>
 public class User
 {
     public int Id { get; set; }
@@ -17,4 +17,6 @@ public class User
     public string PasswordHash { get; set; } = "";
 
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    public ICollection<LibraryEntry> LibraryEntries { get; set; } = [];
 }
