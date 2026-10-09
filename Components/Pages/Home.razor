@@ -1,6 +1,7 @@
 @page "/"
 @implements IDisposable
 @inject LibraryService Library
+@inject IJSRuntime JS
 
 <PageTitle>Library · NovelShelf</PageTitle>
 
@@ -112,6 +113,46 @@
     </div>
 </section>
 
+@if (loaded)
+{
+    <section class="border-t border-line-subtle py-10 sm:py-14">
+        <div class="container-page">
+            <div class="card gap-4">
+                <div class="flex flex-col gap-2">
+                    <span class="kicker">BACKUP</span>
+                    <h2 class="text-xl">Keep your shelf safe</h2>
+                    <p>Your library is stored only in this browser. Export it as a JSON file to back it up or move it to another device.</p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" class="btn btn-matte" disabled="@(Library.Novels.Count == 0)" @onclick="ExportAsync">Export JSON</button>
+                    <label class="btn btn-matte">
+                        Import JSON
+                        <InputFile accept="application/json,.json" class="sr-only" OnChange="ImportAsync" />
+                    </label>
+
+                    @if (confirmClear)
+                    {
+                        <span class="text-sm text-ink-secondary">Delete every novel?</span>
+                        <button type="button" class="btn btn-danger" @onclick="ClearAsync">Yes, clear</button>
+                        <button type="button" class="btn btn-ghost" @onclick="() => confirmClear = false">Cancel</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-ghost hover:text-crimson" disabled="@(Library.Novels.Count == 0)"
+                                @onclick="() => confirmClear = true">Clear library</button>
+                    }
+                </div>
+
+                @if (backupMessage is not null)
+                {
+                    <p class="text-sm @(backupFailed ? "text-crimson" : "text-emerald")" role="status">@backupMessage</p>
+                }
+            </div>
+        </div>
+    </section>
+}
+
 @code {
     private enum SortOrder { Recent, Title, Progress, Added }
 
@@ -168,6 +209,44 @@
 
             return query.ToList();
         }
+    }
+
+    private bool confirmClear;
+    private string? backupMessage;
+    private bool backupFailed;
+
+    private async Task ExportAsync()
+    {
+        var fileName = $"novelshelf-{DateTime.Now:yyyy-MM-dd}.json";
+        await JS.InvokeVoidAsync("novelShelf.downloadFile", fileName, Library.ExportJson(), "application/json");
+        ShowBackupMessage($"Exported {Library.Novels.Count} novels to {fileName}.");
+    }
+
+    private async Task ImportAsync(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            using var reader = new StreamReader(e.File.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024));
+            var count = await Library.ImportJsonAsync(await reader.ReadToEndAsync());
+            ShowBackupMessage($"Imported {count} novels from {e.File.Name}.");
+        }
+        catch (Exception ex) when (ex is System.Text.Json.JsonException or IOException)
+        {
+            ShowBackupMessage("That file isn't a valid NovelShelf backup.", failed: true);
+        }
+    }
+
+    private async Task ClearAsync()
+    {
+        await Library.ClearAsync();
+        confirmClear = false;
+        ShowBackupMessage("Library cleared.");
+    }
+
+    private void ShowBackupMessage(string message, bool failed = false)
+    {
+        backupMessage = message;
+        backupFailed = failed;
     }
 
     private void ClearFilters()

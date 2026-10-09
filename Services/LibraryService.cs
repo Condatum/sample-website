@@ -69,6 +69,29 @@ public class LibraryService(IJSRuntime js)
         await SaveAsync();
     }
 
+    /// <summary>Serializes the whole shelf so it can be saved as a backup file.</summary>
+    public string ExportJson() => JsonSerializer.Serialize(novels, JsonOptions);
+
+    /// <summary>
+    /// Merges novels from a backup: entries with a matching id are replaced, the rest are added.
+    /// Returns how many novels were imported.
+    /// </summary>
+    public async Task<int> ImportJsonAsync(string json)
+    {
+        var imported = JsonSerializer.Deserialize<List<Novel>>(json, JsonOptions) ?? [];
+        imported = imported.Where(n => !string.IsNullOrWhiteSpace(n.Title) && !string.IsNullOrWhiteSpace(n.SourceUrl)).ToList();
+
+        foreach (var novel in imported)
+        {
+            var index = novels.FindIndex(n => n.Id == novel.Id);
+            if (index >= 0) novels[index] = novel;
+            else novels.Add(novel);
+        }
+
+        await SaveAsync();
+        return imported.Count;
+    }
+
     public async Task ResetToSamplesAsync()
     {
         novels = SampleNovels.Create();
@@ -104,8 +127,7 @@ public class LibraryService(IJSRuntime js)
 
     private async Task SaveAsync()
     {
-        var json = JsonSerializer.Serialize(novels, JsonOptions);
-        await js.InvokeVoidAsync("localStorage.setItem", StorageKey, json);
+        await js.InvokeVoidAsync("localStorage.setItem", StorageKey, ExportJson());
         Changed?.Invoke();
     }
 }
