@@ -1,0 +1,92 @@
+@page "/sources"
+@implements IDisposable
+@inject LibraryService Library
+
+<PageTitle>Sources · NovelShelf</PageTitle>
+
+<section class="section">
+    <div class="container-page flex flex-col gap-3">
+        <span class="kicker">SOURCES</span>
+        <h1 class="text-[clamp(1.75rem,3vw,2.4rem)]">Where your novels live</h1>
+        <p class="max-w-2xl">Every site your shelf pulls from, so you can see at a glance which tabs you no longer need to keep open.</p>
+    </div>
+</section>
+
+<section class="py-10 sm:py-14">
+    <div class="container-page">
+        @if (!loaded)
+        {
+            <p class="kicker">Loading…</p>
+        }
+        else if (Groups.Count == 0)
+        {
+            <div class="card items-start justify-start">
+                <h2 class="text-xl">No sources yet.</h2>
+                <p>Add a novel and its site will show up here.</p>
+                <a href="add" class="btn btn-primary">+ Add Novel</a>
+            </div>
+        }
+        else
+        {
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                @foreach (var group in Groups)
+                {
+                    <article class="card justify-start">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex min-w-0 items-center gap-3">
+                                <span class="grid size-10 shrink-0 place-items-center rounded-sm border border-line-strong bg-elevated font-mono text-sm uppercase text-ink">
+                                    @group.Site[0]
+                                </span>
+                                <div class="min-w-0">
+                                    <h2 class="truncate text-base">@group.Site</h2>
+                                    <span class="kicker">@group.Novels.Count @(group.Novels.Count == 1 ? "NOVEL" : "NOVELS") · @group.Novels.Sum(n => n.CurrentChapter) CH READ</span>
+                                </div>
+                            </div>
+                            <a href="https://@group.Host" target="_blank" rel="noopener noreferrer" class="btn btn-ghost shrink-0 px-3 text-xs">Visit ↗</a>
+                        </div>
+
+                        <ul class="flex flex-col gap-2">
+                            @foreach (var novel in group.Novels)
+                            {
+                                <li>
+                                    <a href="novel/@novel.Id" class="flex items-center justify-between gap-3 rounded-sm border border-line-subtle bg-void px-3.5 py-2.5 transition hover:border-line">
+                                        <span class="truncate text-sm text-ink">@novel.Title</span>
+                                        <StatusBadge Status="novel.Status" />
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </article>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@code {
+    private record SourceGroup(string Site, string Host, List<Novel> Novels);
+
+    private bool loaded;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Library.Changed += OnLibraryChanged;
+        await Library.EnsureLoadedAsync();
+        loaded = true;
+    }
+
+    private List<SourceGroup> Groups =>
+        Library.Novels
+            .GroupBy(n => n.SourceSite)
+            .Select(g => new SourceGroup(
+                g.Key,
+                Uri.TryCreate(g.First().SourceUrl, UriKind.Absolute, out var uri) ? uri.Host : g.Key,
+                g.OrderBy(n => n.Title, StringComparer.OrdinalIgnoreCase).ToList()))
+            .OrderByDescending(g => g.Novels.Count)
+            .ThenBy(g => g.Site)
+            .ToList();
+
+    private void OnLibraryChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Library.Changed -= OnLibraryChanged;
+}
