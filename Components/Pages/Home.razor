@@ -1,155 +1,183 @@
 @page "/"
+@implements IDisposable
+@inject LibraryService Library
 
-<PageTitle>Sample Website</PageTitle>
+<PageTitle>Library · NovelShelf</PageTitle>
 
-<!-- HERO SECTION -->
-<section id="home" class="section">
+<section class="section">
     <div class="container-page flex flex-col gap-8">
-        <div class="flex flex-wrap items-center gap-3">
-            <span class="badge">
-                <span class="size-[0.45rem] rounded-full bg-emerald shadow-[0_0_8px_var(--color-emerald)]"></span>
-                <span>Matte Black Template</span>
-            </span>
-            <span class="badge">Blazor + Tailwind CSS</span>
-        </div>
-
-        <div class="flex max-w-3xl flex-col gap-4">
-            <h1 class="hero-title">A Clean Matte Black Website Template.</h1>
+        <div class="flex flex-col gap-3">
+            <span class="kicker">YOUR LIBRARY</span>
+            <h1 class="hero-title">Every novel, one shelf.</h1>
             <p class="max-w-2xl text-lg">
-                Simple, dark aesthetic layout built with C# Blazor and Tailwind CSS. Replace the text and cards below whenever you have your project idea ready.
+                Web novels and light novels from any site, gathered in one place. Track your chapter, then jump straight back in.
             </p>
         </div>
 
-        <div class="flex flex-wrap items-center gap-3">
-            <a href="#features" class="btn btn-primary">Explore Layout</a>
-            <button type="button" class="btn btn-matte" @onclick="IncrementClicks">
-                Test Button (@ClickCount)
-            </button>
-        </div>
+        @if (loaded)
+        {
+            <dl class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                @foreach (var (label, value) in Stats)
+                {
+                    <div class="rounded-md border border-line bg-matte px-4 py-3">
+                        <dt class="kicker">@label</dt>
+                        <dd class="mt-1 text-2xl font-semibold tracking-tight tabular-nums">@value</dd>
+                    </div>
+                }
+            </dl>
+        }
     </div>
 </section>
 
-<!-- BENTO GRID / FEATURES SECTION -->
-<section id="features" class="section">
-    <div class="container-page flex flex-col gap-8">
-        <div class="flex flex-col gap-2">
-            <span class="kicker">LAYOUT</span>
-            <h2 class="text-[clamp(1.5rem,2.5vw,2.1rem)]">Sample Sections &amp; Cards</h2>
-        </div>
-
-        <div class="grid grid-cols-1 gap-5 lg:grid-cols-12">
-            <article class="card card-interactive lg:col-span-8">
-                <div class="flex flex-col gap-2">
-                    <span class="kicker">MAIN FEATURE</span>
-                    <h3 class="mt-1.5 text-[1.4rem]">Your Main Idea Goes Here</h3>
-                    <p>Use this wide card to highlight the main feature of your website, a dashboard preview, or an introduction to your project.</p>
-                </div>
-                <div class="flex flex-wrap gap-3">
-                    <span class="badge">Tailwind CSS</span>
-                    <span class="badge">Responsive Grid</span>
-                </div>
-            </article>
-
-            <article class="card card-interactive lg:col-span-4">
-                <div class="flex flex-col gap-2">
-                    <span class="kicker">HIGHLIGHT</span>
-                    <h3 class="mt-1.5 text-xl">Side Card</h3>
-                    <p>Great for stats, profile info, or quick links.</p>
-                </div>
-                <div class="text-[clamp(1.75rem,2.5vw,2.35rem)] font-semibold tracking-[-0.04em] tabular-nums">100%</div>
-            </article>
-
-            @foreach (var (kicker, title, body) in Cards)
-            {
-                <article class="card card-interactive lg:col-span-4">
-                    <div class="flex flex-col gap-2">
-                        <span class="kicker">@kicker</span>
-                        <h3 class="mt-1.5 text-xl">@title</h3>
-                        <p>@body</p>
-                    </div>
-                </article>
-            }
-        </div>
-    </div>
-</section>
-
-<!-- SIMPLE FORM / INTERACTIVE SECTION -->
-<section id="contact" class="py-12 sm:py-18">
-    <div class="container-page">
-        <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
-            <div class="card">
-                <div class="flex flex-col gap-2">
-                    <span class="kicker">SAMPLE FORM</span>
-                    <h3 class="mt-1.5 text-xl">Add an Item / Note</h3>
-                    <p>Try adding a sample item to test the form input and list.</p>
-                </div>
-
-                <div class="flex flex-col gap-4">
-                    <div class="flex flex-col gap-2">
-                        <label class="field-label" for="item-input">Title</label>
-                        <input id="item-input" class="input" placeholder="Type something..."
-                               @bind="NewItem" @bind:event="oninput" />
-                    </div>
-                    <div>
-                        <button type="button" class="btn btn-primary" @onclick="AddItem">Add to List</button>
+<section class="py-10 sm:py-14">
+    <div class="container-page flex flex-col gap-6">
+        @if (!loaded)
+        {
+            <p class="kicker">Loading your shelf…</p>
+        }
+        else
+        {
+            <!-- Toolbar -->
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-3 sm:flex-row">
+                    <label class="sr-only" for="search">Search</label>
+                    <input id="search" type="search" class="input sm:flex-1" placeholder="Search by title, author, tag or site…"
+                           @bind="search" @bind:event="oninput" />
+                    <div class="flex gap-3">
+                        <label class="sr-only" for="kind">Type</label>
+                        <select id="kind" class="input w-auto" @bind="kindFilter">
+                            <option value="">All types</option>
+                            @foreach (var kind in Enum.GetValues<NovelKind>())
+                            {
+                                <option value="@kind">@kind.DisplayName()</option>
+                            }
+                        </select>
+                        <label class="sr-only" for="sort">Sort by</label>
+                        <select id="sort" class="input w-auto" @bind="sort">
+                            <option value="@SortOrder.Recent">Recently updated</option>
+                            <option value="@SortOrder.Title">Title A–Z</option>
+                            <option value="@SortOrder.Progress">Progress</option>
+                            <option value="@SortOrder.Added">Recently added</option>
+                        </select>
                     </div>
                 </div>
-            </div>
 
-            <div class="card justify-start">
-                <div class="flex flex-col gap-2">
-                    <span class="kicker">SAMPLE LIST (@Items.Count)</span>
-                    <h3 class="mt-1.5 text-xl">Saved Items</h3>
-                </div>
-
-                <div class="flex flex-col gap-2">
-                    @foreach (var item in Items)
+                <div class="flex flex-wrap gap-2" role="tablist" aria-label="Filter by status">
+                    <button type="button" role="tab" aria-selected="@(statusFilter is null)"
+                            class="nav-link border border-line-subtle @(statusFilter is null ? "active" : "")"
+                            @onclick="() => statusFilter = null">
+                        All <span class="ml-1 font-mono text-ink-muted">@Library.Novels.Count</span>
+                    </button>
+                    @foreach (var status in Enum.GetValues<ReadingStatus>())
                     {
-                        <div class="flex items-center justify-between rounded-sm border border-line-subtle bg-void px-3.5 py-3 transition hover:border-line">
-                            <span class="text-ink">@item</span>
-                            <button type="button" class="btn btn-ghost" @onclick="() => RemoveItem(item)">Remove</button>
-                        </div>
+                        <button type="button" role="tab" aria-selected="@(statusFilter == status)"
+                                class="nav-link border border-line-subtle @(statusFilter == status ? "active" : "")"
+                                @onclick="() => statusFilter = status">
+                            @status.DisplayName() <span class="ml-1 font-mono text-ink-muted">@Library.Novels.Count(n => n.Status == status)</span>
+                        </button>
                     }
                 </div>
             </div>
-        </div>
+
+            @if (Library.Novels.Count == 0)
+            {
+                <div class="card items-start justify-start">
+                    <span class="kicker">EMPTY SHELF</span>
+                    <h2 class="text-xl">Your library is empty.</h2>
+                    <p>Add your first web novel or light novel from any site, or load a few examples to explore.</p>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="add" class="btn btn-primary">+ Add Novel</a>
+                        <button type="button" class="btn btn-matte" @onclick="Library.ResetToSamplesAsync">Load examples</button>
+                    </div>
+                </div>
+            }
+            else if (Visible.Count == 0)
+            {
+                <div class="card items-start justify-start">
+                    <h2 class="text-xl">No matches.</h2>
+                    <p>Nothing on your shelf matches these filters.</p>
+                    <button type="button" class="btn btn-matte" @onclick="ClearFilters">Clear filters</button>
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    @foreach (var novel in Visible)
+                    {
+                        <NovelCard @key="novel.Id" Novel="novel" />
+                    }
+                </div>
+            }
+        }
     </div>
 </section>
 
 @code {
-    private static readonly (string Kicker, string Title, string Body)[] Cards =
-    [
-        ("CARD 01", "Matte Surface", "Clean dark cards with subtle borders and smooth hover lift."),
-        ("CARD 02", "Tailwind Utilities", "Styled with Tailwind CSS utility classes and a small set of theme tokens."),
-        ("CARD 03", "C# Powered", "Ready for Blazor buttons, forms, and pages whenever you need them.")
-    ];
+    private enum SortOrder { Recent, Title, Progress, Added }
 
-    private int ClickCount = 0;
-    private string NewItem = "";
+    private bool loaded;
+    private string search = "";
+    private string kindFilter = "";
+    private SortOrder sort = SortOrder.Recent;
+    private ReadingStatus? statusFilter;
 
-    private List<string> Items =
-    [
-        "First sample item",
-        "Second sample item",
-        "Third sample item"
-    ];
-
-    private void IncrementClicks()
+    protected override async Task OnInitializedAsync()
     {
-        ClickCount++;
+        Library.Changed += OnLibraryChanged;
+        await Library.EnsureLoadedAsync();
+        loaded = true;
     }
 
-    private void AddItem()
+    private IEnumerable<(string Label, string Value)> Stats =>
+    [
+        ("NOVELS", Library.Novels.Count.ToString()),
+        ("READING", Library.Novels.Count(n => n.Status == ReadingStatus.Reading).ToString()),
+        ("COMPLETED", Library.Novels.Count(n => n.Status == ReadingStatus.Completed).ToString()),
+        ("CHAPTERS READ", Library.Novels.Sum(n => n.CurrentChapter).ToString("N0"))
+    ];
+
+    private List<Novel> Visible
     {
-        if (!string.IsNullOrWhiteSpace(NewItem))
+        get
         {
-            Items.Add(NewItem.Trim());
-            NewItem = "";
+            IEnumerable<Novel> query = Library.Novels;
+
+            if (statusFilter is { } status)
+                query = query.Where(n => n.Status == status);
+
+            if (Enum.TryParse<NovelKind>(kindFilter, out var kind))
+                query = query.Where(n => n.Kind == kind);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim();
+                query = query.Where(n =>
+                    n.Title.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    (n.Author?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    n.SourceSite.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    n.Tags.Any(t => t.Contains(term, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            query = sort switch
+            {
+                SortOrder.Title => query.OrderBy(n => n.Title, StringComparer.OrdinalIgnoreCase),
+                SortOrder.Progress => query.OrderByDescending(n => n.Progress ?? -1),
+                SortOrder.Added => query.OrderByDescending(n => n.AddedAt),
+                _ => query.OrderByDescending(n => n.UpdatedAt)
+            };
+
+            return query.ToList();
         }
     }
 
-    private void RemoveItem(string item)
+    private void ClearFilters()
     {
-        Items.Remove(item);
+        search = "";
+        kindFilter = "";
+        statusFilter = null;
     }
+
+    private void OnLibraryChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Library.Changed -= OnLibraryChanged;
 }

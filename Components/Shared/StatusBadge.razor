@@ -1,0 +1,29 @@
+<span class="badge @Classes">
+    <span class="size-1.5 rounded-full @DotClass"></span>
+    @Status.DisplayName()
+</span>
+
+@code {
+    [Parameter, EditorRequired] public ReadingStatus Status { get; set; }
+
+    // Full class names are spelled out so Tailwind can find them when scanning.
+    private string Classes => Status switch
+    {
+        ReadingStatus.Reading => "border-emerald/30 text-emerald",
+        ReadingStatus.PlanToRead => "border-indigo/30 text-indigo",
+        ReadingStatus.OnHold => "border-amber/30 text-amber",
+        ReadingStatus.Completed => "border-platinum/30 text-platinum",
+        ReadingStatus.Dropped => "border-crimson/30 text-crimson",
+        _ => ""
+    };
+
+    private string DotClass => Status switch
+    {
+        ReadingStatus.Reading => "bg-emerald",
+        ReadingStatus.PlanToRead => "bg-indigo",
+        ReadingStatus.OnHold => "bg-amber",
+        ReadingStatus.Completed => "bg-platinum",
+        ReadingStatus.Dropped => "bg-crimson",
+        _ => "bg-ink-muted"
+    };
+}

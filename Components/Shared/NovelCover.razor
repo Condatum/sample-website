@@ -1,0 +1,41 @@
+@* Shows the novel's cover image, or a generated gradient with its initials when there is none. *@
+<div class="relative aspect-[2/3] overflow-hidden rounded-sm border border-line bg-elevated @Class">
+    @if (!string.IsNullOrWhiteSpace(Novel.CoverUrl) && !imageFailed)
+    {
+        <img src="@Novel.CoverUrl" alt="Cover of @Novel.Title" loading="lazy" referrerpolicy="no-referrer"
+             class="size-full object-cover" @onerror="() => imageFailed = true" />
+    }
+    else
+    {
+        <div class="flex size-full flex-col justify-between p-3" style="background: @Gradient">
+            <span class="font-mono text-[0.6rem] uppercase tracking-widest text-white/60">@Novel.Kind.DisplayName()</span>
+            <span class="text-2xl font-semibold tracking-tight text-white/90">@Initials</span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Novel Novel { get; set; } = default!;
+    [Parameter] public string? Class { get; set; }
+
+    private bool imageFailed;
+
+    protected override void OnParametersSet() => imageFailed = false;
+
+    private string Initials =>
+        string.Concat(Novel.Title.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Where(w => char.IsLetterOrDigit(w[0]))
+            .Take(2)
+            .Select(w => char.ToUpperInvariant(w[0])));
+
+    // Stable hue per title so each novel keeps the same placeholder colour.
+    private string Gradient
+    {
+        get
+        {
+            var hue = Novel.Title.Aggregate(7, (h, c) => unchecked(h * 31 + c)) & 0x7fffffff;
+            hue %= 360;
+            return $"linear-gradient(150deg, hsl({hue} 35% 28%), hsl({(hue + 40) % 360} 30% 10%))";
+        }
+    }
+}
