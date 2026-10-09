@@ -17,6 +17,8 @@ public class Source
     [Required, Url]
     public string BaseUrl { get; set; } = "";
 
+    public ICollection<Novel> Novels { get; set; } = [];
+
     /// <summary>Returns the host of <paramref name="url"/> without "www.", or null if it isn't a valid link.</summary>
     public static string? NormalizeHost(string? url) =>
         Uri.TryCreate(url, UriKind.Absolute, out var uri)
