@@ -65,6 +65,11 @@
         @apply outline-[1.5px] outline-offset-3 outline-platinum;
     }
 
+    /* Blazor's FocusOnNavigate focuses the page h1 for screen readers; don't draw a ring around it */
+    h1:focus {
+        outline: none;
+    }
+
     h1, h2, h3, h4 {
         @apply font-semibold tracking-tight leading-[1.15] text-balance;
     }
