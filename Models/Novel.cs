@@ -17,7 +17,7 @@ public enum ReadingStatus
     Dropped
 }
 
-public class Novel
+public class Novel : IValidatableObject
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
 
@@ -71,6 +71,29 @@ public class Novel
 
     /// <summary>Where "Continue reading" should take the reader.</summary>
     public string ContinueUrl => string.IsNullOrWhiteSpace(LastReadUrl) ? SourceUrl : LastReadUrl;
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (TotalChapters is { } total && CurrentChapter > total)
+            yield return new ValidationResult("Current chapter can't be past the last chapter.", [nameof(CurrentChapter)]);
+    }
+
+    /// <summary>Guesses a title from a link's last path segment, e.g. ".../mother-of-learning" → "Mother Of Learning".</summary>
+    public static string? GuessTitleFromUrl(string? url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)) return null;
+
+        var slug = uri.Segments.Select(s => s.Trim('/'))
+            .LastOrDefault(s => s.Length > 0 && !s.All(char.IsDigit));
+        if (slug is null) return null;
+
+        slug = Uri.UnescapeDataString(slug).Split('_')[0];
+        var words = slug.Split(['-', '+', ' '], StringSplitOptions.RemoveEmptyEntries)
+            .Where(w => !w.All(char.IsDigit))
+            .Select(w => char.ToUpperInvariant(w[0]) + w[1..]);
+        var title = string.Join(' ', words);
+        return title.Length > 0 ? title : null;
+    }
 
     public Novel Clone()
     {

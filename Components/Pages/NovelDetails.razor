@@ -1,0 +1,182 @@
+@page "/novel/{Id}"
+@implements IDisposable
+@inject LibraryService Library
+@inject NavigationManager Navigation
+
+<PageTitle>@(novel?.Title ?? "Novel") · NovelShelf</PageTitle>
+
+<section class="py-10 sm:py-14">
+    <div class="container-page flex flex-col gap-8">
+        <a href="" class="kicker self-start hover:text-ink">← Library</a>
+
+        @if (!loaded)
+        {
+            <p class="kicker">Loading…</p>
+        }
+        else if (novel is null)
+        {
+            <div class="card items-start justify-start">
+                <h1 class="text-xl">Novel not found.</h1>
+                <p>It may have been removed from your library.</p>
+                <a href="" class="btn btn-primary">Back to Library</a>
+            </div>
+        }
+        else if (editing is not null)
+        {
+            <div class="flex max-w-3xl flex-col gap-6">
+                <h1 class="text-[clamp(1.75rem,3vw,2.4rem)]">Edit “@novel.Title”</h1>
+                <div class="card">
+                    <NovelForm Model="editing" SubmitLabel="Save changes" OnSave="SaveAsync" OnCancel="() => editing = null" />
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-[14rem_1fr] lg:grid-cols-[16rem_1fr]">
+                <NovelCover Novel="novel" Class="mx-auto w-48 md:w-full" />
+
+                <div class="flex min-w-0 flex-col gap-6">
+                    <div class="flex flex-col gap-3">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <StatusBadge Status="novel.Status" />
+                            <span class="badge">@novel.Kind.DisplayName()</span>
+                            <a href="@novel.SourceUrl" target="_blank" rel="noopener noreferrer" class="badge hover:text-ink">@novel.SourceSite ↗</a>
+                        </div>
+                        <h1 class="text-[clamp(1.9rem,4vw,3rem)]">@novel.Title</h1>
+                        @if (!string.IsNullOrWhiteSpace(novel.Author))
+                        {
+                            <p>by <span class="text-ink">@novel.Author</span></p>
+                        }
+                        @if (novel.Rating is { } rating)
+                        {
+                            <p class="text-amber" aria-label="Rated @rating out of 5">
+                                @(new string('★', rating))<span class="text-line-strong">@(new string('★', 5 - rating))</span>
+                            </p>
+                        }
+                    </div>
+
+                    <!-- Progress -->
+                    <div class="card gap-4">
+                        <div class="flex flex-wrap items-end justify-between gap-3">
+                            <div>
+                                <span class="kicker">PROGRESS</span>
+                                <p class="mt-1 text-2xl font-semibold tracking-tight text-ink tabular-nums">
+                                    Chapter @novel.CurrentChapter
+                                    <span class="text-base font-normal text-ink-muted">@(novel.TotalChapters is { } t ? $"of {t}" : "· ongoing")</span>
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" class="btn btn-matte px-3" aria-label="Previous chapter"
+                                        disabled="@(novel.CurrentChapter == 0)" @onclick="() => Library.BumpChapterAsync(novel.Id, -1)">−1</button>
+                                <button type="button" class="btn btn-matte px-3" aria-label="Next chapter"
+                                        disabled="@(novel.TotalChapters is { } total && novel.CurrentChapter >= total)"
+                                        @onclick="() => Library.BumpChapterAsync(novel.Id)">+1</button>
+                            </div>
+                        </div>
+                        @if (novel.Progress is { } p)
+                        {
+                            <div class="h-2 overflow-hidden rounded-full border border-line-subtle bg-void">
+                                <div class="h-full rounded-full bg-linear-to-r from-ink-secondary to-ink transition-[width] duration-300"
+                                     style="width: @((p * 100).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                            </div>
+                        }
+                        <div class="flex flex-wrap gap-3">
+                            <a href="@novel.ContinueUrl" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                                @(novel.CurrentChapter == 0 ? "Start reading" : "Continue reading") ↗
+                            </a>
+                            <select class="input w-auto" aria-label="Change status" value="@novel.Status" @onchange="ChangeStatusAsync">
+                                @foreach (var status in Enum.GetValues<ReadingStatus>())
+                                {
+                                    <option value="@status">@status.DisplayName()</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    @if (novel.Tags.Count > 0)
+                    {
+                        <div class="flex flex-wrap gap-2">
+                            @foreach (var tag in novel.Tags)
+                            {
+                                <span class="badge">#@tag</span>
+                            }
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(novel.Notes))
+                    {
+                        <div class="flex flex-col gap-2">
+                            <span class="kicker">NOTES</span>
+                            <p class="whitespace-pre-line">@novel.Notes</p>
+                        </div>
+                    }
+
+                    <p class="font-mono text-xs text-ink-muted">
+                        Added @novel.AddedAt.ToLocalTime().ToString("MMM d, yyyy") · Updated @novel.UpdatedAt.ToLocalTime().ToString("MMM d, yyyy HH:mm")
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-3 border-t border-line-subtle pt-6">
+                        <button type="button" class="btn btn-matte" @onclick="() => editing = novel.Clone()">Edit details</button>
+                        @if (confirmDelete)
+                        {
+                            <span class="text-sm text-ink-secondary">Remove from library?</span>
+                            <button type="button" class="btn btn-danger" @onclick="DeleteAsync">Yes, remove</button>
+                            <button type="button" class="btn btn-ghost" @onclick="() => confirmDelete = false">Cancel</button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-ghost hover:text-crimson" @onclick="() => confirmDelete = true">Remove</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter] public string Id { get; set; } = "";
+
+    private bool loaded;
+    private bool confirmDelete;
+    private Novel? editing;
+
+    private Novel? novel => Library.Find(Id);
+
+    protected override async Task OnInitializedAsync()
+    {
+        Library.Changed += OnLibraryChanged;
+        await Library.EnsureLoadedAsync();
+        loaded = true;
+    }
+
+    protected override void OnParametersSet()
+    {
+        editing = null;
+        confirmDelete = false;
+    }
+
+    private async Task SaveAsync(Novel model)
+    {
+        await Library.UpdateAsync(model);
+        editing = null;
+    }
+
+    private async Task ChangeStatusAsync(ChangeEventArgs e)
+    {
+        if (novel is null || !Enum.TryParse<ReadingStatus>(e.Value?.ToString(), out var status)) return;
+        var updated = novel.Clone();
+        updated.Status = status;
+        await Library.UpdateAsync(updated);
+    }
+
+    private async Task DeleteAsync()
+    {
+        await Library.RemoveAsync(Id);
+        Navigation.NavigateTo("");
+    }
+
+    private void OnLibraryChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Library.Changed -= OnLibraryChanged;
+}

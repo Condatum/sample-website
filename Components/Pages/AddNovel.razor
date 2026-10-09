@@ -1,0 +1,31 @@
+@page "/add"
+@inject LibraryService Library
+@inject NavigationManager Navigation
+
+<PageTitle>Add Novel · NovelShelf</PageTitle>
+
+<section class="py-10 sm:py-14">
+    <div class="container-page flex max-w-3xl flex-col gap-8">
+        <div class="flex flex-col gap-2">
+            <a href="" class="kicker hover:text-ink">← Library</a>
+            <h1 class="text-[clamp(1.75rem,3vw,2.4rem)]">Add a novel</h1>
+            <p>Paste the link from any site. The title is filled in from the link, and you can adjust everything else.</p>
+        </div>
+
+        <div class="card">
+            <NovelForm Model="novel" SubmitLabel="Add to Library" OnSave="SaveAsync" />
+        </div>
+    </div>
+</section>
+
+@code {
+    private readonly Novel novel = new();
+
+    protected override Task OnInitializedAsync() => Library.EnsureLoadedAsync();
+
+    private async Task SaveAsync(Novel model)
+    {
+        await Library.AddAsync(model);
+        Navigation.NavigateTo($"novel/{model.Id}");
+    }
+}

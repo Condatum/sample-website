@@ -1,0 +1,138 @@
+@* Shared add/edit form for a novel. Works on a copy; the parent decides what to do on submit. *@
+<EditForm Model="Model" OnValidSubmit="Submit" class="flex flex-col gap-6">
+    <DataAnnotationsValidator />
+
+    <div class="flex flex-col gap-2">
+        <label class="field-label" for="source-url">Link to the novel *</label>
+        <InputText id="source-url" class="input" placeholder="https://www.royalroad.com/fiction/21220/mother-of-learning"
+                   @bind-Value="Model.SourceUrl" @bind-Value:after="OnSourceUrlChanged" />
+        <ValidationMessage For="() => Model.SourceUrl" />
+        @if (Model.SourceSite != "unknown")
+        {
+            <span class="text-xs text-ink-muted">Source detected: <span class="font-mono text-ink-secondary">@Model.SourceSite</span></span>
+        }
+    </div>
+
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div class="flex flex-col gap-2 sm:col-span-2">
+            <label class="field-label" for="title">Title *</label>
+            <InputText id="title" class="input" @bind-Value="Model.Title" />
+            <ValidationMessage For="() => Model.Title" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="field-label" for="author">Author</label>
+            <InputText id="author" class="input" @bind-Value="Model.Author" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="field-label" for="kind">Type</label>
+            <InputSelect id="kind" class="input" @bind-Value="Model.Kind">
+                @foreach (var kind in Enum.GetValues<NovelKind>())
+                {
+                    <option value="@kind">@kind.DisplayName()</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="field-label" for="status">Status</label>
+            <InputSelect id="status" class="input" @bind-Value="Model.Status">
+                @foreach (var status in Enum.GetValues<ReadingStatus>())
+                {
+                    <option value="@status">@status.DisplayName()</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="field-label" for="rating">Rating</label>
+            <InputSelect id="rating" class="input" @bind-Value="Model.Rating">
+                <option value="">No rating</option>
+                @for (var i = 5; i >= 1; i--)
+                {
+                    <option value="@i">@(new string('★', i)) (@i)</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="field-label" for="current">Current chapter</label>
+            <InputNumber id="current" class="input" min="0" @bind-Value="Model.CurrentChapter" />
+            <ValidationMessage For="() => Model.CurrentChapter" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="field-label" for="total">Total chapters <span class="text-ink-muted">(leave empty if ongoing)</span></label>
+            <InputNumber id="total" class="input" min="1" @bind-Value="Model.TotalChapters" />
+            <ValidationMessage For="() => Model.TotalChapters" />
+        </div>
+
+        <div class="flex flex-col gap-2 sm:col-span-2">
+            <label class="field-label" for="last-read">Last chapter link <span class="text-ink-muted">(used by “Continue”)</span></label>
+            <InputText id="last-read" class="input" placeholder="https://…/chapter-42" @bind-Value="Model.LastReadUrl" />
+            <ValidationMessage For="() => Model.LastReadUrl" />
+        </div>
+
+        <div class="flex flex-col gap-2 sm:col-span-2">
+            <label class="field-label" for="cover">Cover image link</label>
+            <InputText id="cover" class="input" placeholder="https://…/cover.jpg" @bind-Value="Model.CoverUrl" />
+            <ValidationMessage For="() => Model.CoverUrl" />
+        </div>
+
+        <div class="flex flex-col gap-2 sm:col-span-2">
+            <label class="field-label" for="tags">Tags <span class="text-ink-muted">(comma separated)</span></label>
+            <input id="tags" class="input" placeholder="Fantasy, Isekai, Slow burn" @bind="tagsText" />
+        </div>
+
+        <div class="flex flex-col gap-2 sm:col-span-2">
+            <label class="field-label" for="notes">Notes</label>
+            <InputTextArea id="notes" class="input min-h-28" @bind-Value="Model.Notes" />
+            <ValidationMessage For="() => Model.Notes" />
+        </div>
+    </div>
+
+    <ValidationSummary class="list-inside list-disc text-xs text-crimson" />
+
+    <div class="flex flex-wrap gap-3">
+        <button type="submit" class="btn btn-primary">@SubmitLabel</button>
+        @if (OnCancel.HasDelegate)
+        {
+            <button type="button" class="btn btn-ghost" @onclick="OnCancel">Cancel</button>
+        }
+    </div>
+</EditForm>
+
+@code {
+    [Parameter, EditorRequired] public Novel Model { get; set; } = default!;
+    [Parameter] public string SubmitLabel { get; set; } = "Save";
+    [Parameter] public EventCallback<Novel> OnSave { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private string tagsText = "";
+    private string? autoTitle;
+
+    protected override void OnParametersSet() => tagsText = string.Join(", ", Model.Tags);
+
+    private void OnSourceUrlChanged()
+    {
+        // Fill the title from the link, unless the user typed their own.
+        if (string.IsNullOrWhiteSpace(Model.Title) || Model.Title == autoTitle)
+        {
+            autoTitle = Novel.GuessTitleFromUrl(Model.SourceUrl);
+            if (autoTitle is not null) Model.Title = autoTitle;
+        }
+    }
+
+    private Task Submit()
+    {
+        Model.Tags = tagsText.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        Model.Title = Model.Title.Trim();
+        Model.Author = string.IsNullOrWhiteSpace(Model.Author) ? null : Model.Author.Trim();
+        Model.LastReadUrl = string.IsNullOrWhiteSpace(Model.LastReadUrl) ? null : Model.LastReadUrl.Trim();
+        Model.CoverUrl = string.IsNullOrWhiteSpace(Model.CoverUrl) ? null : Model.CoverUrl.Trim();
+        return OnSave.InvokeAsync(Model);
+    }
+}
