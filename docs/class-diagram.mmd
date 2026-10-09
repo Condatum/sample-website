@@ -1,0 +1,81 @@
+---
+title: NovelShelf — Class Diagram
+---
+classDiagram
+    direction LR
+
+    class User {
+        +int Id
+        +string Username
+        +string Email
+        +string PasswordHash
+        +DateTimeOffset CreatedAt
+        +ICollection~LibraryEntry~ LibraryEntries
+    }
+
+    class LibraryEntry {
+        +int Id
+        +int UserId
+        +int NovelId
+        +ReadingStatus Status
+        +int CurrentChapter
+        +string? LastReadUrl
+        +int? Rating
+        +string? Notes
+        +DateTimeOffset AddedAt
+        +DateTimeOffset UpdatedAt
+        +double? Progress
+        +Validate(ValidationContext) IEnumerable~ValidationResult~
+    }
+
+    class Novel {
+        +int Id
+        +string Title
+        +string? Author
+        +NovelKind Kind
+        +string Url
+        +string? CoverUrl
+        +string? Synopsis
+        +int? TotalChapters
+        +DateTimeOffset CreatedAt
+        +int SourceId
+        +ICollection~Tag~ Tags
+        +ICollection~LibraryEntry~ LibraryEntries
+    }
+
+    class Source {
+        +int Id
+        +string Name
+        +string Host
+        +string BaseUrl
+        +ICollection~Novel~ Novels
+        +NormalizeHost(string? url)$ string?
+    }
+
+    class Tag {
+        +int Id
+        +string Name
+        +ICollection~Novel~ Novels
+    }
+
+    class NovelKind {
+        <<enumeration>>
+        WebNovel
+        LightNovel
+    }
+
+    class ReadingStatus {
+        <<enumeration>>
+        Reading
+        PlanToRead
+        OnHold
+        Completed
+        Dropped
+    }
+
+    User "1" --> "0..*" LibraryEntry : owns
+    Novel "1" --> "0..*" LibraryEntry : shelved as
+    Source "1" --> "0..*" Novel : hosts
+    Novel "0..*" -- "0..*" Tag : tagged with
+    LibraryEntry ..> ReadingStatus
+    Novel ..> NovelKind

@@ -29,6 +29,10 @@ dotnet run
 npm run watch:css
 ```
 
+## Class Diagram
+
+See [docs/class-diagram.md](docs/class-diagram.md) for the planned database model (User, Source, Novel, Tag, LibraryEntry).
+
 ## Project Structure
 
 ```
@@ -36,7 +40,8 @@ Components/
   Layout/    MainLayout (responsive nav), BrandMark
   Pages/     Home (library), AddNovel, NovelDetails, Sources, About
   Shared/    NovelCard, NovelCover, NovelForm, StatusBadge
-Models/      Novel, enums
+Models/      Novel (browser storage), enums
+  Entities/  User, Source, Novel, Tag, LibraryEntry (database models)
 Services/    LibraryService (localStorage), SampleNovels
 Styles/      tailwind.css (theme tokens + component classes)
 ```
