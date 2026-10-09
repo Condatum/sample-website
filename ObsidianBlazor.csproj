@@ -8,4 +8,9 @@
     <AllowMissingPrunePackageData>true</AllowMissingPrunePackageData>
   </PropertyGroup>
 
+  <!-- Rebuild Tailwind CSS before each build when the npm tooling is installed -->
+  <Target Name="BuildTailwind" BeforeTargets="Build" Condition="Exists('node_modules/.bin/tailwindcss')">
+    <Exec Command="npm run build:css" />
+  </Target>
+
 </Project>

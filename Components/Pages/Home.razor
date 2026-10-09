@@ -5,25 +5,23 @@
 
 <!-- HERO SECTION -->
 <section id="home" class="section">
-    <div class="container stack-lg">
-        <div class="flex-row">
+    <div class="container-page flex flex-col gap-8">
+        <div class="flex flex-wrap items-center gap-3">
             <span class="badge">
-                <span class="status-dot online"></span>
+                <span class="size-[0.45rem] rounded-full bg-emerald shadow-[0_0_8px_var(--color-emerald)]"></span>
                 <span>Matte Black Template</span>
             </span>
-            <span class="badge">Blazor + Pure CSS</span>
+            <span class="badge">Blazor + Tailwind CSS</span>
         </div>
 
-        <div class="stack-md" style="max-inline-size: 48rem;">
-            <h1 class="hero-title">
-                A Clean Matte Black Website Template.
-            </h1>
-            <p style="font-size: 1.125rem; max-inline-size: 40rem;">
-                Simple, dark aesthetic layout built with C# Blazor and pure CSS. Replace the text and cards below whenever you have your project idea ready.
+        <div class="flex max-w-3xl flex-col gap-4">
+            <h1 class="hero-title">A Clean Matte Black Website Template.</h1>
+            <p class="max-w-2xl text-lg">
+                Simple, dark aesthetic layout built with C# Blazor and Tailwind CSS. Replace the text and cards below whenever you have your project idea ready.
             </p>
         </div>
 
-        <div class="flex-row">
+        <div class="flex flex-wrap items-center gap-3">
             <a href="#features" class="btn btn-primary">Explore Layout</a>
             <button type="button" class="btn btn-matte" @onclick="IncrementClicks">
                 Test Button (@ClickCount)
@@ -34,101 +32,82 @@
 
 <!-- BENTO GRID / FEATURES SECTION -->
 <section id="features" class="section">
-    <div class="container stack-lg">
-        <div class="stack-sm">
-            <span class="card-kicker">LAYOUT</span>
-            <h2 class="section-title">Sample Sections &amp; Cards</h2>
+    <div class="container-page flex flex-col gap-8">
+        <div class="flex flex-col gap-2">
+            <span class="kicker">LAYOUT</span>
+            <h2 class="text-[clamp(1.5rem,2.5vw,2.1rem)]">Sample Sections &amp; Cards</h2>
         </div>
 
-        <div class="bento-grid">
-            <article class="matte-card interactive col-span-8">
-                <div class="stack-sm">
-                    <span class="card-kicker">MAIN FEATURE</span>
-                    <h3 class="card-title" style="font-size: 1.4rem;">Your Main Idea Goes Here</h3>
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-12">
+            <article class="card card-interactive lg:col-span-8">
+                <div class="flex flex-col gap-2">
+                    <span class="kicker">MAIN FEATURE</span>
+                    <h3 class="mt-1.5 text-[1.4rem]">Your Main Idea Goes Here</h3>
                     <p>Use this wide card to highlight the main feature of your website, a dashboard preview, or an introduction to your project.</p>
                 </div>
-                <div class="flex-row">
-                    <span class="badge">Pure CSS</span>
+                <div class="flex flex-wrap gap-3">
+                    <span class="badge">Tailwind CSS</span>
                     <span class="badge">Responsive Grid</span>
                 </div>
             </article>
 
-            <article class="matte-card interactive col-span-4">
-                <div class="stack-sm">
-                    <span class="card-kicker">HIGHLIGHT</span>
-                    <h3 class="card-title">Side Card</h3>
+            <article class="card card-interactive lg:col-span-4">
+                <div class="flex flex-col gap-2">
+                    <span class="kicker">HIGHLIGHT</span>
+                    <h3 class="mt-1.5 text-xl">Side Card</h3>
                     <p>Great for stats, profile info, or quick links.</p>
                 </div>
-                <div class="metric-value">100%</div>
+                <div class="text-[clamp(1.75rem,2.5vw,2.35rem)] font-semibold tracking-[-0.04em] tabular-nums">100%</div>
             </article>
 
-            <article id="cards" class="matte-card interactive col-span-4">
-                <div class="stack-sm">
-                    <span class="card-kicker">CARD 01</span>
-                    <h3 class="card-title">Matte Surface</h3>
-                    <p>Clean dark cards with subtle borders and smooth hover lift.</p>
-                </div>
-            </article>
-
-            <article class="matte-card interactive col-span-4">
-                <div class="stack-sm">
-                    <span class="card-kicker">CARD 02</span>
-                    <h3 class="card-title">Pure CSS Only</h3>
-                    <p>No Bootstrap or Tailwind. Everything lives in a single clean stylesheet.</p>
-                </div>
-            </article>
-
-            <article class="matte-card interactive col-span-4">
-                <div class="stack-sm">
-                    <span class="card-kicker">CARD 03</span>
-                    <h3 class="card-title">C# Powered</h3>
-                    <p>Ready for Blazor buttons, forms, and pages whenever you need them.</p>
-                </div>
-            </article>
+            @foreach (var (kicker, title, body) in Cards)
+            {
+                <article class="card card-interactive lg:col-span-4">
+                    <div class="flex flex-col gap-2">
+                        <span class="kicker">@kicker</span>
+                        <h3 class="mt-1.5 text-xl">@title</h3>
+                        <p>@body</p>
+                    </div>
+                </article>
+            }
         </div>
     </div>
 </section>
 
 <!-- SIMPLE FORM / INTERACTIVE SECTION -->
-<section id="contact" class="section" style="border-block-end: none;">
-    <div class="container stack-lg">
-        <div class="bento-grid">
-            <div class="matte-card col-span-6">
-                <div class="stack-sm">
-                    <span class="card-kicker">SAMPLE FORM</span>
-                    <h3 class="card-title">Add an Item / Note</h3>
+<section id="contact" class="py-12 sm:py-18">
+    <div class="container-page">
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+            <div class="card">
+                <div class="flex flex-col gap-2">
+                    <span class="kicker">SAMPLE FORM</span>
+                    <h3 class="mt-1.5 text-xl">Add an Item / Note</h3>
                     <p>Try adding a sample item to test the form input and list.</p>
                 </div>
 
-                <div class="stack-md">
-                    <div class="field-group">
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-col gap-2">
                         <label class="field-label" for="item-input">Title</label>
-                        <input id="item-input"
-                               class="input-matte"
-                               placeholder="Type something..."
-                               @bind="NewItem"
-                               @bind:event="oninput" />
+                        <input id="item-input" class="input" placeholder="Type something..."
+                               @bind="NewItem" @bind:event="oninput" />
                     </div>
-
                     <div>
-                        <button type="button" class="btn btn-primary" @onclick="AddItem">
-                            Add to List
-                        </button>
+                        <button type="button" class="btn btn-primary" @onclick="AddItem">Add to List</button>
                     </div>
                 </div>
             </div>
 
-            <div class="matte-card col-span-6">
-                <div class="stack-sm">
-                    <span class="card-kicker">SAMPLE LIST (@Items.Count)</span>
-                    <h3 class="card-title">Saved Items</h3>
+            <div class="card justify-start">
+                <div class="flex flex-col gap-2">
+                    <span class="kicker">SAMPLE LIST (@Items.Count)</span>
+                    <h3 class="mt-1.5 text-xl">Saved Items</h3>
                 </div>
 
-                <div class="stack-sm">
+                <div class="flex flex-col gap-2">
                     @foreach (var item in Items)
                     {
-                        <div class="toggle-row">
-                            <span class="text-primary">@item</span>
+                        <div class="flex items-center justify-between rounded-sm border border-line-subtle bg-void px-3.5 py-3 transition hover:border-line">
+                            <span class="text-ink">@item</span>
                             <button type="button" class="btn btn-ghost" @onclick="() => RemoveItem(item)">Remove</button>
                         </div>
                     }
@@ -139,6 +118,13 @@
 </section>
 
 @code {
+    private static readonly (string Kicker, string Title, string Body)[] Cards =
+    [
+        ("CARD 01", "Matte Surface", "Clean dark cards with subtle borders and smooth hover lift."),
+        ("CARD 02", "Tailwind Utilities", "Styled with Tailwind CSS utility classes and a small set of theme tokens."),
+        ("CARD 03", "C# Powered", "Ready for Blazor buttons, forms, and pages whenever you need them.")
+    ];
+
     private int ClickCount = 0;
     private string NewItem = "";
 

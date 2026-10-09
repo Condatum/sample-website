@@ -1,45 +1,41 @@
 @inherits LayoutComponentBase
 
-<div class="app-shell">
-    <header class="topbar">
-        <div class="topbar-inner">
-            <a href="" class="brand">
-                <span class="brand-mark" aria-hidden="true"></span>
+<div class="flex min-h-dvh flex-col">
+    <header class="sticky top-0 z-50 border-b border-line-subtle bg-void/80 backdrop-blur-lg">
+        <div class="container-page flex h-16 items-center justify-between gap-6">
+            <a href="" class="inline-flex items-center gap-2.5 text-[0.95rem] font-semibold tracking-tight">
+                <BrandMark />
                 <span>SAMPLE WEBSITE</span>
             </a>
 
-            <nav class="nav-links" aria-label="Main Navigation">
-                <a href="#home" class="nav-item active">Home</a>
-                <a href="#features" class="nav-item">Features</a>
-                <a href="#cards" class="nav-item">Cards</a>
-                <a href="#contact" class="nav-item">Contact</a>
+            <nav class="hidden items-center gap-1 rounded-full border border-line-subtle bg-matte p-1 md:flex" aria-label="Main Navigation">
+                <a href="#home" class="rounded-full bg-elevated px-3.5 py-1.5 text-[0.825rem] text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">Home</a>
+                <a href="#features" class="rounded-full px-3.5 py-1.5 text-[0.825rem] text-ink-secondary transition hover:text-ink">Features</a>
+                <a href="#cards" class="rounded-full px-3.5 py-1.5 text-[0.825rem] text-ink-secondary transition hover:text-ink">Cards</a>
+                <a href="#contact" class="rounded-full px-3.5 py-1.5 text-[0.825rem] text-ink-secondary transition hover:text-ink">Contact</a>
             </nav>
 
-            <div class="flex-row">
-                <a href="#contact" class="btn btn-primary">Get Started</a>
-            </div>
+            <a href="#contact" class="btn btn-primary">Get Started</a>
         </div>
     </header>
 
-    <main style="flex: 1;">
+    <main class="flex-1">
         @Body
     </main>
 
-    <footer style="padding-block: 2.5rem; border-block-start: 1px solid var(--border-subtle);">
-        <div class="container flex-between" style="flex-wrap: wrap;">
-            <div class="flex-row">
-                <span class="brand-mark" aria-hidden="true"></span>
-                <span class="text-secondary">Sample Website</span>
+    <footer class="border-t border-line-subtle py-10">
+        <div class="container-page flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <BrandMark />
+                <span class="text-ink-secondary">Sample Website</span>
             </div>
-            <div class="text-muted">
-                <span>Built with C# Blazor &amp; Pure CSS</span>
-            </div>
+            <span class="text-ink-muted">Built with C# Blazor &amp; Tailwind CSS</span>
         </div>
     </footer>
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
+    <a href="." class="reload underline">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
