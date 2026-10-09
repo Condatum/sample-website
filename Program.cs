@@ -1,10 +1,13 @@
 using ObsidianBlazor.Components;
+using ObsidianBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddScoped<LibraryService>();
 
 var app = builder.Build();
 
